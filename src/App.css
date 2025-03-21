@@ -20,7 +20,7 @@
 }
 
 .container {
-  margin: 50px;
+  margin: 0px;
   padding-top: 10vh;
   display: flex;
   color: whitesmoke;
@@ -28,6 +28,7 @@
   justify-content: center;
   text-align: center;
   background-color: #f6f6f62f;
+  width: 50%;
 }
 
 .logo {

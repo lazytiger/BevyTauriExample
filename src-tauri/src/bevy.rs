@@ -1,9 +1,10 @@
+use crate::tauri_plugin::{TauriPlugin, AVERAGE_FRAME_RATE};
 use bevy::animation::{animated_field, AnimationTarget, AnimationTargetId};
 use bevy::prelude::*;
+use bevy::render::camera::Viewport;
+use bevy::window::WindowResized;
 use std::f32::consts::PI;
 use std::sync::atomic::Ordering;
-
-use crate::tauri_plugin::{TauriPlugin, AVERAGE_FRAME_RATE};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -14,7 +15,6 @@ fn greet(name: &str) -> String {
 pub fn get_average_frame_rate() -> usize {
     AVERAGE_FRAME_RATE.load(Ordering::Relaxed)
 }
-
 
 // This function is called from the main thread to setup the Bevy app
 pub fn setup_bevy() {
@@ -32,7 +32,6 @@ pub fn setup_bevy() {
         bevy::hierarchy::HierarchyPlugin::default(),
         bevy::diagnostic::DiagnosticsPlugin::default(),
         bevy::input::InputPlugin::default(),
-        
     ));
     app.add_plugins(WindowPlugin {
         primary_window: Some(Window::default()),
@@ -53,9 +52,9 @@ pub fn setup_bevy() {
             .expect("error while building tauri application")
     }));
 
-
     // App setup
     app.add_systems(Startup, setup)
+        .add_systems(Update, update_viewport)
         .insert_resource(AmbientLight {
             color: Color::WHITE,
             brightness: 150.0,
@@ -65,6 +64,26 @@ pub fn setup_bevy() {
     let _ = app.run();
 }
 
+fn update_viewport(
+    mut reader: EventReader<WindowResized>,
+    windows: Query<&Window>,
+    mut cameras: Query<&mut Camera>,
+) {
+    let mut camera = cameras.single_mut();
+    for event in reader.read() {
+        let window = windows.get(event.window).unwrap();
+        let mut size = window.physical_size();
+        size.x /= 2;
+        let mut pos = size;
+        pos.y = 0;
+        camera.viewport = Some(Viewport {
+            physical_size: size,
+            physical_position: pos,
+            ..Default::default()
+        });
+    }
+}
+
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -72,8 +91,10 @@ fn setup(
     mut animations: ResMut<Assets<AnimationClip>>,
     mut graphs: ResMut<Assets<AnimationGraph>>,
 ) {
+    let camera = Camera::default();
     // Camera
     commands.spawn((
+        camera,
         Camera3d::default(),
         Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));

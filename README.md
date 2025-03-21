@@ -37,3 +37,8 @@ yarn tauri build
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+
+
+## 测试了在tauri中直接显示bevy画面，可以为以后以tauri来实现一个bevy editor打下基础
+* 在bevy中通过viewport让camera直接显示在屏幕的某个地方，那个地方可以作为显示3d的视图
+* 屏幕中的其他地方均为tauri的显示区域
